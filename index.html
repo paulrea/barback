@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pint Battle</title>
+
+<style>
+:root{
+  --bg:#ffffff;
+  --card:#f8f9fb;
+  --card2:#eef1f6;
+  --text:#111111;
+  --muted:#6b7280;
+  --accent:#2563eb;
+  --border:#e5e7eb;
+  --shadow:0 8px 30px rgba(0,0,0,.08);
+  --radius:18px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  color:var(--text);
+  background:var(--bg);
+  min-height:100vh;
+}
+.shell{
+  width:min(720px,94vw);
+  margin:0 auto;
+  padding:24px 18px 60px;
+}
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  margin-bottom:12px;
+}
+.titleLink{
+  text-decoration:none;
+  color:inherit;
+  display:inline-block;
+}
+.titleLink:hover{opacity:.82}
+.title{
+  font-weight:950;
+  font-size:22px;
+  letter-spacing:-0.3px;
+}
+.meta{
+  font-size:13px;
+  color:var(--muted);
+}
+.progress{
+  height:6px;
+  background:#f1f3f5;
+  border-radius:999px;
+  overflow:hidden;
+  margin-bottom:24px;
+  border:1px solid var(--border);
+}
+.progress>div{
+  height:100%;
+  width:0%;
+  background:var(--accent);
+  transition:width .2s ease;
+}
+
+/* Home */
+.home{
+  display:grid;
+  gap:18px;
+}
+.homeHeader{
+  display:grid;
+  gap:8px;
+}
+.homeHeader h1{
+  margin:0;
+  font-size:26px;
+  font-weight:950;
+  letter-spacing:-0.4px;
+}
+.homeHeader p{
+  margin:0;
+  color:var(--muted);
+  font-weight:650;
+  line-height:1.35;
+}
+.gameGrid{
+  display:grid;
+  grid-template-columns:repeat(1, 1fr);
+  gap:14px;
+}
+@media (min-width: 640px){
+  .gameGrid{ grid-template-columns:repeat(2, 1fr); }
+}
+.gameCard{
+  border:1px solid var(--border);
+  background:var(--card);
+  border-radius:16px;
+  padding:16px;
+  box-shadow:var(--shadow);
+  display:grid;
+  gap:10px;
+}
+.gameCardTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+}
+.gameTitle{
+  font-weight:950;
+  font-size:16px;
+}
+.gameDesc{
+  color:var(--muted);
+  font-weight:650;
+  font-size:13px;
+  line-height:1.35;
+}
+.badge{
+  font-size:12px;
+  color:var(--muted);
+  padding:6px 10px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:#fff;
+  white-space:nowrap;
+}
+.smallNote{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:650;
+}
+
+/* Stage + cards */
+.stage{position:relative;height:540px}
+.card{
+  position:absolute;
+  inset:0;
+  padding:22px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  user-select:none;
+  touch-action:pan-y;
+  transition:transform .18s ease;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.card.back{
+  transform:scale(.97) translateY(10px);
+  background:var(--card2);
+  opacity:.86;
+}
+
+.cardTop{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+}
+.pill{
+  font-size:12px;
+  color:var(--muted);
+  padding:6px 12px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:#ffffff;
+}
+
+.categoryLabel{
+  font-size:11px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.7px;
+  color:var(--accent);
+  margin-top:2px;
+}
+
+.prompt{
+  font-size:22px;
+  font-weight:950;
+  line-height:1.25;
+  margin-top:4px;
+}
+.actionBox{
+  margin-top:auto;
+  border:1px solid var(--border);
+  background:#ffffff;
+  border-radius:16px;
+  padding:14px;
+  display:grid;
+  gap:8px;
+}
+.actionTitle{
+  font-size:12px;
+  letter-spacing:.6px;
+  text-transform:uppercase;
+  font-weight:900;
+  color:var(--muted);
+}
+.actionText{
+  font-size:16px;
+  font-weight:900;
+}
+
+.hintRow{
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  color:var(--muted);
+  margin-top:12px;
+}
+
+/* Buttons */
+.btnRow{display:flex;gap:12px;flex-wrap:wrap}
+.btn{
+  appearance:none;
+  border:1px solid var(--border);
+  background:#ffffff;
+  color:var(--text);
+  padding:12px 16px;
+  border-radius:14px;
+  font-weight:900;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.btn:hover{background:#f3f4f6}
+a{color:var(--accent);text-decoration:none;font-weight:900}
+</style>
+</head>
+
+<body>
+<div class="shell">
+  <div class="topbar">
+    <a class="titleLink" href="./"><div class="title">Pint Battle</div></a>
+    <div class="meta" id="meta"></div>
+  </div>
+  <div class="progress"><div id="progressFill"></div></div>
+  <div id="content"></div>
+</div>
+
+<script>
+/**
+ * GAME DATA
+ * Each card is: category + prompt + action
+ * Add as many as you want.
+ */
+const MODES = [
+  {
+    id: "classic",
+    name: "Classic Pint Battle",
+    badge: "Fast",
+    description: "Endless prompts + actions. Swipe right when done, left to go back.",
+    deck: [
+      { category:"Debate", prompt:"Pick the better snack.", action:"Argue for your pick for 20 seconds." },
+      { category:"Story", prompt:"Tell a 10-second origin story.", action:"Make it dramatic. No pauses." },
+      { category:"Compliment", prompt:"Give a weirdly specific compliment.", action:"Must be sincere." },
+      { category:"Confession", prompt:"Confess a harmless secret.", action:"Keep it PG." },
+      { category:"Challenge", prompt:"Create a team chant.", action:"Everyone repeats it once." },
+      { category:"Opinion", prompt:"Hot take time.", action:"Deliver it confidently, then defend it." }
+    ]
+  },
+  {
+    id: "couples",
+    name: "Couples Edition",
+    badge: "Connection",
+    description: "Softer prompts for partners in a bar setting.",
+    deck: [
+      { category:"Connection", prompt:"Name one thing you appreciate right now.", action:"Say it out loud, no sarcasm." },
+      { category:"Memory", prompt:"Best moment from the last month.", action:"Tell the short version (20 sec)." },
+      { category:"Plans", prompt:"One date idea you actually want.", action:"Pitch it like an ad." },
+      { category:"Communication", prompt:"One small request that would help.", action:"Ask clearly, kindly." }
+    ]
+  },
+  {
+    id: "chaos",
+    name: "Wildcard Chaos",
+    badge: "Party",
+    description: "Ridiculous actions. Keep it respectful.",
+    deck: [
+      { category:"Chaos", prompt:"Invent a new cocktail name.", action:"Give it a tagline." },
+      { category:"Chaos", prompt:"Pick a table mascot.", action:"Everyone agrees on a name." },
+      { category:"Dare", prompt:"Do a 5-second pose.", action:"Hold it. No laughing." },
+      { category:"Improv", prompt:"Make up a fake award show speech.", action:"Thank at least 3 people." }
+    ]
+  },
+  {
+    id: "first-date",
+    name: "First Date Energy",
+    badge: "Icebreaker",
+    description: "Playful but safe prompts for getting to know someone.",
+    deck: [
+      { category:"Icebreaker", prompt:"Your best ‘two-truths-one-lie’ line.", action:"Tell it. Others guess." },
+      { category:"Taste", prompt:"Pick your ‘perfect Saturday.’", action:"Describe it in 15 seconds." },
+      { category:"Humor", prompt:"Your most controversial food opinion.", action:"Defend it politely." }
+    ]
+  },
+  {
+    id: "spicy",
+    name: "Spicy Mode",
+    badge: "Adults",
+    description: "Flirty prompts, still consent-first.",
+    deck: [
+      { category:"Flirt", prompt:"Deliver a flirty line.", action:"Keep it playful, not creepy." },
+      { category:"Chemistry", prompt:"Name a small thing that turns you on.", action:"Say it with confidence." },
+      { category:"Boundaries", prompt:"Name a clear ‘no’ for you.", action:"Normalize it. No judgement." }
+    ]
+  }
+];
+
+// swipe config
+const SWIPE_THRESHOLD = 120;
+const EXIT_DISTANCE = 520;
+const EXIT_MS = 160;
+
+// state
+let modeId = null;
+let deck = [];
+let deckIndex = 0;         // how many cards we've shown (for stats)
+let animLock = false;
+
+const history = [];        // stack of card objects: {category,prompt,action, id}
+let current = null;
+let nextCardObj = null;
+
+const content = document.getElementById("content");
+const meta = document.getElementById("meta");
+const progressFill = document.getElementById("progressFill");
+
+// Helpers
+function escapeHtml(str){
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function setMeta(){
+  if (!modeId){
+    meta.textContent = "";
+    progressFill.style.width = "0%";
+    return;
+  }
+  meta.textContent = `${deckIndex} cards played`;
+  // "endless progress" — show a subtle looping feel by modding the width
+  const w = (deckIndex % 20) * 5; // 0..95
+  progressFill.style.width = `${w}%`;
+}
+
+function renderHome(){
+  const wrap = document.createElement("div");
+  wrap.className = "home";
+  wrap.innerHTML = `
+    <div class="homeHeader">
+      <h1>Pick a Mode</h1>
+      <p>Endless cards. No answers — just do the action. Swipe right when done. Swipe left to go back.</p>
+      <div class="smallNote">Tip: Put the phone on “guided access” if you’re in a chaotic bar.</div>
+    </div>
+
+    <div class="gameGrid">
+      ${MODES.map(m => `
+        <div class="gameCard">
+          <div class="gameCardTop">
+            <div>
+              <div class="gameTitle">${escapeHtml(m.name)}</div>
+              <div class="gameDesc">${escapeHtml(m.description)}</div>
+            </div>
+            <div class="badge">${escapeHtml(m.badge)}</div>
+          </div>
+          <div class="btnRow">
+            <button class="btn" data-start="${escapeHtml(m.id)}">Start</button>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+  content.appendChild(wrap);
+
+  wrap.querySelectorAll("button[data-start]").forEach(btn => {
+    btn.onclick = () => startMode(btn.getAttribute("data-start"), true);
+  });
+}
+
+function goHome(pushUrl){
+  modeId = null;
+  deck = [];
+  deckIndex = 0;
+  history.length = 0;
+  current = null;
+  nextCardObj = null;
+
+  if (pushUrl){
+    const url = new URL(window.location.href);
+    url.searchParams.delete("m");
+    window.history.pushState(null, "", url.toString());
+  }
+  render();
+}
+
+function startMode(id, pushUrl){
+  const mode = MODES.find(m => m.id === id);
+  if (!mode) return;
+
+  modeId = mode.id;
+  deck = mode.deck.slice();
+  deckIndex = 0;
+  history.length = 0;
+
+  current = drawCard();
+  history.push(current);
+  nextCardObj = drawCard();
+
+  if (pushUrl){
+    const url = new URL(window.location.href);
+    url.searchParams.set("m", modeId);
+    window.history.pushState(null, "", url.toString());
+  }
+
+  render();
+}
+
+function drawCard(){
+  // Endless: pick randomly from deck (you can swap for sequential if desired)
+  const base = deck[Math.floor(Math.random() * deck.length)];
+  // assign a unique id so duplicates still have distinct history entries
+  return { ...base, _id: `${Date.now()}-${Math.random().toString(16).slice(2)}` };
+}
+
+function render(){
+  content.innerHTML = "";
+  setMeta();
+
+  if (!modeId){
+    renderHome();
+    return;
+  }
+
+  const stage = document.createElement("div");
+  stage.className = "stage";
+
+  // Back card (preview of next)
+  stage.appendChild(makeCard(nextCardObj, true));
+
+  // Active card
+  stage.appendChild(makeCard(current, false));
+
+  content.appendChild(stage);
+}
+
+function makeCard(cardObj, isBack){
+  const card = document.createElement("div");
+  card.className = "card" + (isBack ? " back" : "");
+
+  const modeName = MODES.find(m => m.id === modeId)?.name ?? "Mode";
+
+  card.innerHTML = `
+    <div class="cardTop">
+      <div class="pill">${escapeHtml(modeName)}</div>
+      <div class="pill">${history.length} in history</div>
+    </div>
+
+    <div class="categoryLabel">${escapeHtml(cardObj.category)}</div>
+    <div class="prompt">${escapeHtml(cardObj.prompt)}</div>
+
+    <div class="actionBox">
+      <div class="actionTitle">Action</div>
+      <div class="actionText">${escapeHtml(cardObj.action)}</div>
+    </div>
+
+    ${!isBack ? `
+      <div class="hintRow">
+        <div>Swipe left: Back</div>
+        <div>Swipe right: Done</div>
+      </div>
+
+      <div class="btnRow" style="margin-top:14px">
+        <button class="btn" id="backBtn">Back</button>
+        <button class="btn" id="doneBtn">Done</button>
+        <button class="btn" id="homeBtn">Home</button>
+      </div>
+    ` : ``}
+  `;
+
+  if (!isBack){
+    card.querySelector("#backBtn").onclick = () => goBack();
+    card.querySelector("#doneBtn").onclick = () => advance();
+    card.querySelector("#homeBtn").onclick = () => goHome(true);
+    attachSwipe(card);
+  }
+
+  return card;
+}
+
+function advance(){
+  // Done -> move forward endlessly
+  deckIndex += 1;
+
+  current = nextCardObj;
+  history.push(current);
+
+  nextCardObj = drawCard();
+
+  render();
+}
+
+function goBack(){
+  if (history.length <= 1) return; // nothing to go back to
+  history.pop();                   // remove current
+  current = history[history.length - 1];
+  // preview becomes a newly drawn card (since "next" is undefined in back direction)
+  nextCardObj = drawCard();
+  render();
+}
+
+function attachSwipe(card){
+  let startX = 0, startY = 0;
+  let dx = 0, dy = 0;
+  let dragging = false;
+  let pointerId = null;
+  let locked = null; // horizontal vs vertical
+
+  function setTransform(x){
+    card.style.transform = `translateX(${x}px) rotate(${x/20}deg)`;
+  }
+  function reset(){
+    card.style.transition = "transform .18s ease";
+    setTransform(0);
+    dx = 0; dy = 0; locked = null;
+  }
+  function exitThen(dir, fn){
+    animLock = true;
+    card.style.transition = "transform .14s ease";
+    setTransform(dir * EXIT_DISTANCE);
+    setTimeout(() => {
+      animLock = false;
+      fn();
+    }, EXIT_MS);
+  }
+
+  card.addEventListener("pointerdown", e => {
+    if (animLock) return;
+    if (e.button !== undefined && e.button !== 0) return;
+    if (e.target.closest("button, a, input, textarea, select, label")) return;
+
+    dragging = true;
+    pointerId = e.pointerId;
+    startX = e.clientX;
+    startY = e.clientY;
+    dx = 0; dy = 0; locked = null;
+
+    card.style.transition = "none";
+    card.setPointerCapture(pointerId);
+  });
+
+  card.addEventListener("pointermove", e => {
+    if (!dragging || e.pointerId !== pointerId) return;
+
+    dx = e.clientX - startX;
+    dy = e.clientY - startY;
+
+    if (locked === null) {
+      if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) locked = false;
+      else if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) locked = true;
+      else return;
+    }
+    if (!locked) return;
+    setTransform(dx);
+  });
+
+  function end(){
+    if (!dragging) return;
+    dragging = false;
+
+    if (locked !== true) { reset(); return; }
+
+    if (dx > SWIPE_THRESHOLD) {
+      exitThen(+1, () => advance());
+    } else if (dx < -SWIPE_THRESHOLD) {
+      if (history.length <= 1) { reset(); return; }
+      exitThen(-1, () => goBack());
+    } else {
+      reset();
+    }
+  }
+
+  card.addEventListener("pointerup", end);
+  card.addEventListener("pointercancel", () => { dragging=false; reset(); });
+  card.addEventListener("lostpointercapture", end);
+}
+
+// init via ?m=modeId
+(function init(){
+  const url = new URL(window.location.href);
+  const m = url.searchParams.get("m");
+  if (m && MODES.some(x => x.id === m)) {
+    startMode(m, false);
+  } else {
+    render();
+  }
+})();
+</script>
+</body>
+</html>
